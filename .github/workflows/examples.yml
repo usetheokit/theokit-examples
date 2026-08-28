@@ -1,0 +1,82 @@
+name: Examples
+
+# Every example installs theokit from the REGISTRY, so this workflow answers a question the
+# SDK's own CI cannot: does the published package still work for someone who types
+# `npm install`? A green build here is evidence about the artifact, not about a workspace.
+#
+# It runs on a schedule as well as on push. The examples live outside the SDK deliberately, so
+# nothing in that repository can notice when a release breaks one of them — this is what
+# notices, and a weekly cadence is enough to catch it while it is still one release old.
+
+on:
+  push:
+    branches: [workspace, main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Mondays, 06:00 UTC. Rot is found by the calendar or not at all.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: examples-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  typecheck:
+    name: typecheck (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # One entry per runnable example. Adding a directory without adding it here means it is
+        # not checked, which is the failure mode this list exists to make visible.
+        example: [capabilities/memory]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # No lockfile is committed and none is used: the point is to install what a stranger
+      # installs today, against the version each example pins in its own package.json.
+      - name: Install from the registry
+        working-directory: ${{ matrix.example }}
+        run: npm install --no-package-lock
+
+      # Typecheck rather than run. Running needs a provider credential, and a scheduled job that
+      # needs a secret is a job that silently stops running when the secret rotates. Typecheck
+      # catches the failure mode these examples were written to catch: an API that moved.
+      - name: Typecheck against the published package
+        working-directory: ${{ matrix.example }}
+        run: npm run typecheck
+
+  examples-ok:
+    name: Examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs: [typecheck]
+    steps:
+      - name: Report
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -q '"result": *"failure"'; then
+            echo "::error::an example failed to typecheck against the published package"
+            exit 1
+          fi
+          if echo "$RESULTS" | grep -q '"result": *"cancelled"'; then
+            echo "::error::a job was cancelled"
+            exit 1
+          fi
+          echo "every example typechecks against what is published"

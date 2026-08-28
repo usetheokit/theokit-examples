@@ -1,3 +1,12 @@
+node_modules/
+dist/
 
-# Kit de manutencao (Squad) + config local do Claude Code: nao versionado
+# Personal tooling, never versioned: it is an installed plugin with its own repository, not a
+# source of this project.
 .claude/
+BACKLOG.md
+
+# What the examples produce when they run. `capabilities/*/workspace/` is a memory store an
+# example wrote during a demo — committing it would ship someone else's remembered facts and
+# make the first run of a fresh clone start non-empty.
+workspace/

@@ -7,9 +7,16 @@ None of them link to a local checkout. That is the point: an example that resolv
 workspace tests the repository it lives in, not the experience of the person who typed
 `npm install`. This repository is deliberately outside the SDK so that it cannot cheat.
 
-The cost of standing outside is that an example can rot without the SDK's CI noticing. Nothing here
-answers that yet — **this repository has no CI**. Until it does, an example is only as fresh as the
-last time somebody ran it, and that is a gap rather than a plan.
+The cost of standing outside is that an example can rot without the SDK's CI noticing. CI here
+answers part of that: each example is installed fresh from the registry and **typechecked**
+against it, on every push and weekly, so an API that moved surfaces as a red build rather than as
+a wasted afternoon for a reader.
+
+Typechecked, not run. Running needs a provider credential, and a scheduled job that depends on a
+secret is a job that stops silently when the secret rotates. Typechecking catches the failure
+these examples exist to catch — a published surface that no longer matches what the example calls
+— and does not pretend to catch the rest. The contract checker is not in CI either: it lives in a
+sibling repository, so it stays a local gate until that changes.
 
 ## How to run one
 
