@@ -1,0 +1,32 @@
+{
+  "skill": "theokit-memory",
+  "teaches": ["@theokit/sdk"],
+  "concept": "An agent that remembers what it learns between separate runs, in markdown files on disk",
+  "triggers": ["memory", "remember between sessions", "MEMORY.md", "persist what the agent learns"],
+  "regions": [
+    {
+      "id": "create-agent-with-memory",
+      "explains": "Turning memory on, and why the permission layer is registered by default"
+    },
+    {
+      "id": "ask-and-wait",
+      "explains": "Sending a message and waiting for the run to finish, which are two calls"
+    }
+  ],
+  "notCovered": [
+    "external memory adapters: mem0, honcho, supermemory",
+    "sharing one memory store between several agents",
+    "pruning or expiring what was remembered"
+  ],
+  "credentials": ["a provider credential for THEOKIT_MODEL"],
+  "evidence": [
+    {
+      "command": "npm start -- demo:poisoned",
+      "claims": "A planted memory entry phrased as standing policy drove the action it described in 2 of 6 runs without the permission layer, and 0 of 6 with it."
+    },
+    {
+      "command": "npm start -- verify:permissions",
+      "claims": "An engine constructed with an empty rule array blocks every tool call, so the protection is the engine being present rather than a rule written in advance."
+    }
+  ]
+}
