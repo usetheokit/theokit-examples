@@ -10,9 +10,9 @@ name: Examples
 
 on:
   push:
-    branches: [workspace, main]
+    branches: [develop, main]
   pull_request:
-    branches: [main]
+    branches: [develop, main]
   schedule:
     # Mondays, 06:00 UTC. Rot is found by the calendar or not at all.
     - cron: '0 6 * * 1'
@@ -37,24 +37,36 @@ jobs:
         # not checked, which is the failure mode this list exists to make visible.
         example: [capabilities/memory]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
 
-      # No lockfile is committed and none is used: the point is to install what a stranger
-      # installs today, against the version each example pins in its own package.json.
-      - name: Install from the registry
+      # First prove the reviewed, reproducible tree. This distinguishes a source regression from
+      # registry drift and makes a red scheduled run diagnosable.
+      - name: Install the locked tree
         working-directory: ${{ matrix.example }}
-        run: npm install --no-package-lock
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck the locked tree
+        working-directory: ${{ matrix.example }}
+        run: npm run typecheck
+
+      # Then resolve the current registry tree. This is deliberately non-deterministic: the job's
+      # second question is whether a new compatible transitive release broke a fresh consumer.
+      - name: Install the current registry tree
+        working-directory: ${{ matrix.example }}
+        run: |
+          rm -rf node_modules
+          npm install --no-package-lock --no-audit --no-fund
 
       # Typecheck rather than run. Running needs a provider credential, and a scheduled job that
       # needs a secret is a job that silently stops running when the secret rotates. Typecheck
       # catches the failure mode these examples were written to catch: an API that moved.
-      - name: Typecheck against the published package
+      - name: Typecheck the current registry tree
         working-directory: ${{ matrix.example }}
         run: npm run typecheck
 
