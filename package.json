@@ -1,0 +1,8 @@
+{
+  "name": "theokit-examples",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node ../theokit-skills/bin/check-example.mjs ."
+  }
+}
