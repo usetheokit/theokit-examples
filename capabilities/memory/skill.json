@@ -22,11 +22,11 @@
   "evidence": [
     {
       "command": "npm start -- demo:poisoned",
-      "claims": "A planted memory entry phrased as standing policy drove the action it described in 2 of 6 runs without the permission layer, and 0 of 6 with it."
+      "claims": "Runs the planted-entry scenario once with the permission layer off and once with it on, and prints whether the planted instruction produced the action in each arm. It demonstrates the difference between the two arms; it does not measure a rate."
     },
     {
-      "command": "npm start -- verify:permissions",
-      "claims": "An engine constructed with an empty rule array blocks every tool call, so the protection is the engine being present rather than a rule written in advance."
+      "command": "npm start -- verify:permissions 6",
+      "claims": "Re-runs both arms n times each with PermissionEngine constructed positionally, and prints the counts. It exists because the original measurement came from a script that built the engine as PermissionEngine({ rules: [] }); the constructor takes its rules positionally, so that form produced a crash whose observable outcome was indistinguishable from a block."
     }
   ]
 }
