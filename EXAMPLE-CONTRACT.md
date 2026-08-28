@@ -65,7 +65,7 @@ noted:
 | `evidence` | array of `{ command, claims }` (optional, defaults to `[]`) | a command that was actually run, and what its output proves |
 
 A `skill.json` that fails this shape — wrong types, empty arrays where a non-empty one is
-required, an `id` that isn't kebab-case, a `teaches` entry that isn't a `@theokit/...` subpath —
+required, an `id` that isn't kebab-case, a `teaches` entry that doesn't match the `@theokit/<package>` pattern —
 is reported under [`manifest`](#manifest).
 
 ## Region markers
