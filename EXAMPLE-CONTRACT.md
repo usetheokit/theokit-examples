@@ -57,7 +57,7 @@ noted:
 |---|---|---|
 | `skill` | string | kebab-case, must start with `theokit-`, and must equal `theokit-<directory-slug>` |
 | `concept` | non-empty string | what this example teaches, in one sentence |
-| `teaches` | non-empty array of strings | each entry must look like a `@theokit/...` export subpath, e.g. `@theokit/sdk/memory` |
+| `teaches` | non-empty array of strings | each entry is a `@theokit/...` export subpath, e.g. `@theokit/sdk/memory` — a bare package root (e.g. `@theokit/sdk`) is also valid when the capability is configured through the root export, as `capabilities/memory` is |
 | `triggers` | non-empty array of strings | phrases that should cause an agent to reach for this skill |
 | `notCovered` | non-empty array of strings | what this example deliberately does not teach |
 | `regions` | non-empty array of `{ id, explains }` | `id` is kebab-case and must match a region marker opened in the example's source (see below); `explains` is a non-empty sentence |
