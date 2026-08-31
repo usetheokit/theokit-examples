@@ -1,0 +1,107 @@
+name: Back-merge main into the long-lived branches
+
+# Carry what lands on `main` back to the branches work is born on, without needing anyone
+# to notice that it did not happen.
+#
+# WHY THIS EXISTS HERE, and it is NOT the reason the sibling repository has it. In
+# `theokit-sdk` the cost of drift is a re-release: a promotion cut from a branch still
+# holding already-consumed changesets would republish shipped versions, and a CI gate
+# refuses it. **This repository has no changesets and publishes nothing**, so that failure
+# mode does not exist here and porting its rationale would be citing a mechanism that does
+# not apply.
+#
+# What does apply is the drift itself. `main` advances only through `develop → main`
+# releases, and nothing carries the merge commits back. Measured 2026-08-31, right after a
+# release: `develop` one commit behind, `workspace` three. Nobody sees it until the next
+# promotion is cut, and then the release commits appear in the diff as if they were new
+# work — which is a confusing review, not a broken one, and the reason this is worth sixty
+# lines rather than a gate.
+#
+# It opens the pull request and stops there. Merging stays a human action; the friction
+# being removed is REMEMBERING, not reviewing.
+#
+# Harvested from `usetheokit/theokit-sdk` (issue #485), where `workspace` had gone ten
+# commits behind and no pull request had ever been opened against it. Same defect, milder
+# consequence, same cure.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One at a time: two pushes to main in quick succession would otherwise race to open the
+# same pull request.
+concurrency: backmerge-${{ github.ref }}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-backmerge-pr:
+    name: Open main → ${{ matrix.branch }} PR when it is behind
+    runs-on: ubuntu-latest
+    strategy:
+      # Both permanent branches, and never cancelled as a pair: `develop` being up to date
+      # must not keep `workspace` from getting its pull request.
+      fail-fast: false
+      matrix:
+        branch: [develop, workspace]
+    # The job is two git counts and at most one `gh pr create`. A ceiling this tight turns a
+    # hang into a fast, obvious failure instead of a runner held for GitHub's 6-hour default.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          # The pull request is opened through `gh`, which authenticates from GH_TOKEN below.
+          # Nothing here uses the git credential, so it does not stay behind in .git/config.
+          persist-credentials: false
+
+      - name: Open the PR when the branch is behind
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Through the environment rather than interpolated into the script body. The value
+          # is a literal from the matrix, but a `${{ }}` inside a `run:` is a script-injection
+          # sink and the habit is what keeps the next one safe.
+          TARGET: ${{ matrix.branch }}
+        run: |
+          set -euo pipefail
+
+          behind="$(git rev-list --count "origin/${TARGET}..origin/main")"
+          echo "${TARGET} is ${behind} commit(s) behind main"
+
+          # The steady state. Saying so explicitly keeps a green run from being read as
+          # "the job did not run".
+          if [ "${behind}" -eq 0 ]; then
+            echo "✓ nothing to back-merge"
+            exit 0
+          fi
+
+          existing="$(gh pr list --base "${TARGET}" --head main --state open --json number \
+            --jq '.[0].number // empty')"
+          if [ -n "${existing}" ]; then
+            echo "✓ PR #${existing} is already open and will pick these commits up"
+            exit 0
+          fi
+
+          # `workspace` is a LIVE checkout, unlike `develop`. Opening the PR touches no
+          # working tree, but whoever merges it may need a clean one, and saying so costs a
+          # line and saves a confusing refusal.
+          note=""
+          if [ "${TARGET}" = "workspace" ]; then
+            note=$'\n\n`workspace` is where work is born and is usually checked out somewhere with\nuncommitted changes. Opening this PR touches nothing; merging it may need a clean tree.'
+          fi
+
+          gh pr create \
+            --base "${TARGET}" \
+            --head main \
+            --title "chore: back-merge main into ${TARGET}" \
+            --body "Opened automatically after a push to \`main\`.
+
+          \`main\` advances only through \`develop → main\` releases, and nothing carries those merge
+          commits back. Until this lands, \`${TARGET}\` is missing them — and the next promotion cut
+          from that state shows the release commits in its diff as if they were new work.
+
+          Nothing is broken while this sits; the review just gets harder to read. It costs least to
+          merge soon after the release it follows.${note}"
