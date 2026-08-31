@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../appplugins"
+		},
+		{
+			"path": "../../../appteste"
+		}
+	],
+	"settings": {}
+}

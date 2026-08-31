@@ -1,0 +1,59 @@
+{
+  "skill": "theokit-sdk-claude-code-memory",
+  "concept": "Whether the SDK writes memory the way the Claude Code CLI does, measured against a recording of a real session rather than against the documentation",
+  "teaches": ["@theokit/sdk"],
+  "triggers": [
+    "claude code memory compatibility",
+    "does theokit write memory like claude code",
+    "where does claude code store auto memory",
+    "MEMORY.md format",
+    "my agent cannot see the memories claude code saved"
+  ],
+  "notCovered": [
+    "how recall ranks a fact once it is found — sdk/memory covers the store, not retrieval quality",
+    "CLAUDE.md files and .claude/rules/, which are written by hand and not by either writer",
+    "whether the divergences it reports MATTER to a given app — it measures, it does not rank"
+  ],
+  "lessons": [
+    {
+      "id": "core-describe-a-store",
+      "explains": "Reduce a memory directory to the shape two implementations can disagree about — files, index, frontmatter keys — so a comparison reports the four differences that matter instead of every timestamp"
+    },
+    {
+      "id": "core-the-recorded-oracle",
+      "explains": "The CLI's layout is a RECORDING from a live session carrying its version, not a restatement of the docs — because the docs are what a reader can already check"
+    },
+    {
+      "id": "minimal",
+      "explains": "One write, then look at disk; and appendFact's config argument is not optional, despite reading like it"
+    },
+    {
+      "id": "variant-recapture-the-oracle",
+      "explains": "Refresh the recording by driving a real Claude Code session in tmux from a nested subdirectory — the shape that separates cwd-keying from git-root-keying"
+    },
+    {
+      "id": "pitfall-git-root-keying",
+      "explains": "The SDK reads the Claude store keyed by cwd while the CLI writes it keyed by the git root, so an agent below the root finds nothing and reports nothing"
+    },
+    {
+      "id": "pitfall-empty-memory-dir",
+      "explains": "An empty memory/ directory describes identically to no store at all, which is how counting directories produced a confident wrong answer about keying"
+    },
+    {
+      "id": "pitfall-documentation-is-not-the-oracle",
+      "explains": "Asserting against the documentation proves the documentation; only a running CLI can say whether the installed one still behaves that way"
+    }
+  ],
+  "evidence": [
+    {
+      "command": "npm test",
+      "claims": "Writes a real store with the SDK and compares its shape against a recording taken from claude 2.1.236. Asserts the three divergences that exist today rather than the zero somebody would prefer, proves an empty memory directory is indistinguishable from an absent one, and pins the cwd-vs-git-root keying defect so it cannot be fixed silently. No credential and no CLI login."
+    },
+    {
+      "command": "npm start -- compare",
+      "claims": "Prints the SDK's store shape and every divergence from the recorded CLI layout, in a temp directory it removes afterwards."
+    }
+  ],
+  "seeAlso": ["theokit-sdk-memory", "theokit-framework-memory"],
+  "requires": ["theokit-sdk-memory"]
+}

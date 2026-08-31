@@ -1,0 +1,62 @@
+{
+  "skill": "theokit-sdk-memory",
+  "teaches": [
+    "@theokit/sdk"
+  ],
+  "concept": "An agent that remembers what it learns between separate runs, in markdown files on disk",
+  "triggers": [
+    "memory",
+    "remember between sessions",
+    "MEMORY.md",
+    "persist what the agent learns"
+  ],
+  "lessons": [
+    {
+      "id": "minimal",
+      "explains": "Memory in the fewest lines that work: one option on Agent.create, and two processes that share nothing but a directory"
+    },
+    {
+      "id": "core-create-agent-with-memory",
+      "explains": "Turning memory on, and why the permission layer is registered by default"
+    },
+    {
+      "id": "core-ask-and-wait",
+      "explains": "Sending a message and waiting for the run to finish, which are two calls"
+    },
+    {
+      "id": "pitfall-send-returns-handle",
+      "explains": "Reading the answer off send() prints nothing while the memory file is written correctly, so the symptom points at the wrong half of the system"
+    },
+    {
+      "id": "pitfall-permission-engine-shape",
+      "explains": "PermissionEngine takes its rules positionally; the options-object form does not throw, it stores the options object where the array belongs, so no rule can ever match"
+    }
+  ],
+  "notCovered": [
+    "external memory adapters: mem0, honcho, supermemory",
+    "sharing one memory store between several agents",
+    "pruning or expiring what was remembered"
+  ],
+  "credentials": [],
+  "evidence": [
+    {
+      "command": "npm start",
+      "claims": "Prints usage and exits 0 with no credential set, which is the smoke test that needs nothing configured."
+    },
+    {
+      "command": "npm start -- pitfall:permissions",
+      "claims": "Constructs PermissionEngine both ways against @theokit/sdk 4.61.0 and prints the resulting `rules` field: an array of 1 positionally, and the whole options object for the object form. Needs no credential. It shows the object form does not throw; it does not measure what the engine then permits."
+    },
+    {
+      "command": "npm start -- demo:poisoned",
+      "claims": "Runs the planted-entry scenario once with the permission layer off and once with it on, and prints whether the planted instruction produced the action in each arm. It demonstrates the difference between the two arms; it does not measure a rate."
+    },
+    {
+      "command": "npm start -- verify:permissions 6",
+      "claims": "Re-runs both arms n times each with PermissionEngine constructed positionally, and prints the counts. It exists because the original measurement came from a script that built the engine as PermissionEngine({ rules: [] }); that form stores the options object where the rule array belongs, so the engine was inert and its observable outcome was indistinguishable from a block."
+    }
+  ],
+  "seeAlso": [
+    "theokit-framework-memory"
+  ]
+}

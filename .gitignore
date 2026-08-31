@@ -10,3 +10,4 @@ BACKLOG.md
 # example wrote during a demo — committing it would ship someone else's remembered facts and
 # make the first run of a fresh clone start non-empty.
 workspace/
+.theokit

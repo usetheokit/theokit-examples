@@ -1,0 +1,48 @@
+{
+  "skill": "theokit-framework-memory",
+  "concept": "An agent that is a file and remembers between HTTP requests, in a directory the app chooses",
+  "teaches": ["theokit", "@theokit/agents", "@theokit/sdk"],
+  "triggers": [
+    "agent memory in theokit",
+    "remember between requests",
+    "where does agent memory get stored",
+    "memory.directory",
+    "my agent forgets everything"
+  ],
+  "notCovered": [
+    "the React side — useAgent and rendering the stream",
+    "per-user memory stores and the owner check a real app needs",
+    "recall quality: whether the right fact is retrieved for a given question",
+    "memory poisoning and the permission layer — sdk/memory measures that"
+  ],
+  "lessons": [
+    {
+      "id": "core-memory-on-an-agent-file",
+      "explains": "A served agent keeps nothing between requests except what is on disk, and .memory() takes the SDK's MemorySettings unchanged — including where the store lives"
+    },
+    {
+      "id": "setup-agent-policy",
+      "explains": "Why 'public' costs more once an agent remembers: over a stateless agent it leaks a reply, over this one it leaks a history"
+    },
+    {
+      "id": "pitfall-relative-directory",
+      "explains": "A relative directory is refused rather than resolved, because 'relative to what' has two answers in a served app"
+    },
+    {
+      "id": "pitfall-writes-need-an-instruction",
+      "explains": "The agent never decides to remember — a durable entry traces to the user's text, so a UI that never sends the instruction produces no entries"
+    },
+    {
+      "id": "pitfall-csrf-header",
+      "explains": "A state-changing route is CSRF-protected by default, so a hand-built request gets 403 before it reaches the agent"
+    }
+  ],
+  "evidence": [
+    {
+      "command": "npm test",
+      "claims": "Starts the real theokit dev with no credential and proves four things: an unknown agent is 404 while this one is 200; a durable memory lands in the declared directory and NOT in the SDK's default; and a fact learned in one request appears in the prompt the provider receives on the next"
+    }
+  ],
+  "seeAlso": ["theokit-sdk-memory", "theokit-framework-agent-endpoint"],
+  "requires": ["theokit-framework-agent-endpoint"]
+}

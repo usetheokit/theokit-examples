@@ -1,0 +1,58 @@
+{
+  "skill": "theokit-framework-agent-endpoint",
+  "teaches": [
+    "theokit",
+    "@theokit/agents",
+    "@theokit/sdk"
+  ],
+  "concept": "An agent is a file, and the file's path is its HTTP route — nothing registers it",
+  "triggers": [
+    "agent endpoint",
+    "how do I serve an agent",
+    "POST /api/agents",
+    "file-based agent routing",
+    "theokit agents directory"
+  ],
+  "lessons": [
+    {
+      "id": "core-agent-as-a-file",
+      "explains": "Saving agents/chat.ts serves POST /api/agents/chat. There is no router to touch and no handler to write — what the file exports is the whole endpoint, and .input() is enforced before the agent runs"
+    },
+    {
+      "id": "setup-agent-policy",
+      "explains": "Every agent declares who may run it; 'public' is a decision rather than the absence of one, and it covers the run, the thread routes, the approval surface and MCP"
+    },
+    {
+      "id": "pitfall-csrf-header",
+      "explains": "A state-changing route is CSRF-protected by default: a hand-built fetch without X-Theo-Action gets 403, which reads as a broken agent and is a request that never reached one"
+    },
+    {
+      "id": "pitfall-provider-registry",
+      "explains": "The framework refuses a model id whose provider the app never named, so a prefix that works in a plain Agent.create script is rejected before any request leaves the process"
+    },
+    {
+      "id": "variant-declared-provider",
+      "explains": "Declaring the SDK catalog with .plugins(Provider.builtins()) makes a prefix routable — and a second agent is a second file, needing no more registration than the first"
+    }
+  ],
+  "notCovered": [
+    "the React side: useAgent, the chat UI, and streaming into a component",
+    "tools, skills and human-in-the-loop approvals on the agent",
+    "server/routes, WebSocket, cron and the rest of the framework's surface",
+    "auth: this example's agent is public and has no login"
+  ],
+  "credentials": [],
+  "seeAlso": [
+    "theokit-sdk-memory"
+  ],
+  "evidence": [
+    {
+      "command": "npm test",
+      "claims": "Starts the real dev server with LLM_MODEL pointed at runtime/fake-provider.ts and asserts over HTTP: an unnamed agent is 404 while agents/chat.ts answers 200 with the provider's text, a body that does not match .input() never reaches the agent, a request without X-Theo-Action is 403, an undeclared provider prefix is refused, and a second agent declaring Provider.builtins() reaches a prefix the first one cannot. It proves the routing, the compilation and the transport. It proves nothing about a model's answer, because the model is a local stub."
+    },
+    {
+      "command": "npm run dev",
+      "claims": "Serves the app the way a reader would run it. Without a provider credential the agent route still exists and answers with a provider error rather than 404 — which is itself the proof that the file became a route."
+    }
+  ]
+}

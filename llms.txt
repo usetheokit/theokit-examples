@@ -1,0 +1,24 @@
+# theokit examples
+
+> Runnable examples for the theokit ecosystem — one directory per documented capability, each
+> installing theokit from npm at a pinned version, exactly as a stranger would.
+
+Every example is a directory holding a `skill.json`. Its `README.md` opens with a one-line
+summary of what the example proves; its `src/` holds the lessons a generated skill copies
+verbatim. Read the README first, then the file the lesson names.
+
+## SDK
+
+- [sdk/claude-code-memory](sdk/claude-code-memory/README.md): Whether the SDK writes memory the way the Claude Code CLI does, measured against a recording of a real session rather than against the documentation
+- [sdk/memory](sdk/memory/README.md): An agent that remembers what it learns between separate runs, in markdown files on disk
+
+## Framework
+
+- [framework/agent-endpoint](framework/agent-endpoint/README.md): An agent is a file, and the file's path is its HTTP route — nothing registers it
+- [framework/claude-code-memory](framework/claude-code-memory/README.md): A served agent writes the same store a direct call writes — and whether the Claude Code CLI can classify it is decided by the caller's message, not by the framework
+- [framework/memory](framework/memory/README.md): An agent that is a file and remembers between HTTP requests, in a directory the app chooses
+
+## Contract
+
+- [EXAMPLE-CONTRACT.md](EXAMPLE-CONTRACT.md): the shape every example above must have, and the
+  name of the checker rule that fires when one does not

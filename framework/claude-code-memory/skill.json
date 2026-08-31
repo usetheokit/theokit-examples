@@ -1,0 +1,43 @@
+{
+  "skill": "theokit-framework-claude-code-memory",
+  "concept": "A served agent writes the same store a direct call writes — and whether the Claude Code CLI can classify it is decided by the caller's message, not by the framework",
+  "teaches": ["theokit", "@theokit/agents", "@theokit/sdk"],
+  "triggers": [
+    "does my served agent write memory correctly",
+    "memory type missing",
+    "metadata.type",
+    "claude code cannot categorise my memories",
+    "Remember (project) vs Remember"
+  ],
+  "notCovered": [
+    "the layout comparison against the CLI itself — sdk/claude-code-memory owns that, against a recorded session",
+    "recall quality: whether the right memory is found once stored",
+    "the React side and per-user stores"
+  ],
+  "lessons": [
+    {
+      "id": "core-a-served-agent-writes-the-same-store",
+      "explains": "The trip through theokit dev, HTTP and the agent changes nothing about the store's shape — the index entry and the file land in the same form a direct call produces"
+    },
+    {
+      "id": "core-the-kind-comes-from-the-callers-text",
+      "explains": "metadata.type is written only when the message declares a kind, so in a served app the browser or service composing the request decides whether the memory is classifiable"
+    },
+    {
+      "id": "setup-agent-policy",
+      "explains": "The declaration the framework's route gate reads, and what 'public' exposes once the agent remembers"
+    },
+    {
+      "id": "pitfall-csrf-header",
+      "explains": "A state-changing route is CSRF-protected by default, so a hand-built request is refused before it reaches the agent"
+    }
+  ],
+  "evidence": [
+    {
+      "command": "npm test",
+      "claims": "Starts a real theokit dev with no credential and drives two message forms through the same served agent: 'Remember (project): …' produces a memory carrying metadata.type, 'Remember: …' produces one carrying none. Both are stored — the difference is classification, not validity. Also asserts the index entry has the CLI's shape and that the boot refuses nothing."
+    }
+  ],
+  "seeAlso": ["theokit-sdk-claude-code-memory", "theokit-framework-memory"],
+  "requires": ["theokit-sdk-claude-code-memory", "theokit-framework-memory"]
+}
