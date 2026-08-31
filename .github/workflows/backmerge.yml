@@ -17,6 +17,19 @@ name: Back-merge main into the long-lived branches
 # work — which is a confusing review, not a broken one, and the reason this is worth sixty
 # lines rather than a gate.
 #
+# WHY `workspace` ONLY. This was ported with a `develop` leg as well, and that leg contradicts
+# `rules/git-safety.md` § 1, which says `develop` "advances only by promoting `workspace`" and to
+# "never merge anything other than `workspace` into it". One `main → develop` pull request was
+# merged here before the contradiction was noticed (#7).
+#
+# The port carried the defect: it was made from `theokit-sdk` hours before the analysis that
+# condemned that half landed there (usetheokit/theokit-sdk#496). That is the ordinary shape of it —
+# the fix stays in the repository where the defect was found, and the defect travels in the port.
+#
+# Dropping the leg costs nothing: `main → workspace` followed by the ordinary `workspace → develop`
+# promotion is the path a human already has to take, so `develop` still receives everything, through
+# the gate instead of around it.
+#
 # It opens the pull request and stops there. Merging stays a human action; the friction
 # being removed is REMEMBERING, not reviewing.
 #
@@ -46,7 +59,7 @@ jobs:
       # must not keep `workspace` from getting its pull request.
       fail-fast: false
       matrix:
-        branch: [develop, workspace]
+        branch: [workspace]
     # The job is two git counts and at most one `gh pr create`. A ceiling this tight turns a
     # hang into a fast, obvious failure instead of a runner held for GitHub's 6-hour default.
     timeout-minutes: 10
