@@ -5,6 +5,7 @@
   "scripts": {
     "check": "node ../theokit-skills/bin/check-example.mjs . && node scripts/check-structure.mjs",
     "check:structure": "node scripts/check-structure.mjs",
+    "examples:list": "node scripts/list-examples.mjs",
     "index": "node scripts/build-index.mjs",
     "index:check": "node scripts/build-index.mjs --check",
     "new": "node scripts/new-example.mjs",

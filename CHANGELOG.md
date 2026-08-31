@@ -4,6 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
+### Fixed
+
+- **CI checked one example, and it was the one that no longer existed.** The typecheck matrix was a
+  hand-written list naming `capabilities/memory`, which the restructure had renamed — so every run
+  failed on `npm ci` in a missing path while four real examples went unchecked. The list is now
+  derived by `scripts/list-examples.mjs`, using the same discovery as the index generator and the
+  structure checker: a directory holding a `skill.json`. An example the checker validates cannot be
+  one CI skips.
+
+  The matrix's own comment had named the risk — *"adding a directory without adding it here means it
+  is not checked"* — which is the tell: a list that has to describe its own failure mode in prose is
+  a list nobody can keep current.
+
 ### Added
 
 - **The conformance pair — `sdk/claude-code-memory` and `framework/claude-code-memory`.** Both ask
