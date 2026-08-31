@@ -26,16 +26,42 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  # The example list is DERIVED, never written.
+  #
+  # It was a hand-written matrix whose own comment named the risk — "adding a directory without
+  # adding it here means it is not checked". What happened was worse than an omission: a rename left
+  # it pointing at `capabilities/memory`, a directory that no longer existed, so every run failed on
+  # a path that was not there while four real examples went unchecked. A list somebody must remember
+  # to update cannot report its own staleness.
+  #
+  # `scripts/list-examples.mjs` uses the same discovery as the index generator and the structure
+  # checker: a directory holding a `skill.json`. One rule, three consumers — an example the checker
+  # validates cannot be one CI skips.
+  discover:
+    name: discover examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      examples: ${{ steps.list.outputs.examples }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+      - id: list
+        run: echo "examples=$(node scripts/list-examples.mjs)" >> "$GITHUB_OUTPUT"
+
   typecheck:
     name: typecheck (${{ matrix.example }})
+    needs: discover
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        # One entry per runnable example. Adding a directory without adding it here means it is
-        # not checked, which is the failure mode this list exists to make visible.
-        example: [capabilities/memory]
+        example: ${{ fromJSON(needs.discover.outputs.examples) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -72,10 +98,10 @@ jobs:
 
   examples-ok:
     name: Examples
+    needs: [discover, typecheck]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: always()
-    needs: [typecheck]
     steps:
       - name: Report
         env:
