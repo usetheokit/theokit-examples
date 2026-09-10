@@ -366,6 +366,17 @@ version — a bare `major.minor.patch`, optionally with a prerelease suffix (`4.
 `4.61.0-beta.1`). Ranges (`^4.61.0`, `~4.61.0`), tags (`latest`, `next`), and workspace links are
 all rejected.
 
+One prerelease shape is refused: a **changesets snapshot**, recognised by the trailing 14-digit UTC
+timestamp `changeset version --snapshot <tag>` appends (`0.64.1-pr479-20260831130000`). A snapshot
+is published to verify a fix from the registry before a release cut, under a dist-tag that is
+deliberately not `latest` — it is a throwaway, and a stranger never installs one. The intended
+sequence is publish, verify, then pin the release; nothing made the last step happen, and npm
+versions are immutable after 72 hours, so a snapshot left behind resolves forever while the example
+demonstrates a tree that was never released (`usetheokit/theokit-skills#24`).
+
+The match is anchored on the timestamp rather than on any tag, because the tag comes from a dispatch
+input and matching one workflow's would leave the next one's open.
+
 Why: this repository's README states its central promise in the first paragraph — every example
 installs theokit from npm, at a pinned version, exactly as a stranger would. A floating range
 means the code a reader is looking at and the code `npm install` actually resolves can silently
